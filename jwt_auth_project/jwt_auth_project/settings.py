@@ -59,6 +59,79 @@ INSTALLED_APPS = [
     'auth_app',
 ]
 
+# Global setting Rest Framework related configuration added in the single dictionary
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # Use Django's standard `django.contrib.auth` permissions,
+        # or allow read-only access for unauthenticated users.
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+# below line tells Django to use a custom user model instead of the default one
+AUTH_USER_MODEL = 'auth_app.User'
+
+# import required for setting up token life 
+from datetime import timedelta
+
+# simple jwt related configuration for token
+SIMPLE_JWT = {
+    # sets ACCESS_TOKEN life time currently it set to 5 hours you can change as per your requirements
+    # A datetime.timedelta object which specifies how long access tokens are valid.
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=5),
+    
+    # set REFRESH_TOKEN life time it can be modified as per your requirements
+    # A datetime.timedelta object which specifies how long refresh tokens are valid. 
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    
+    # When set to True, if a refresh token is submitted to the TokenRefreshView, a new refresh token will be returned along with the new access token.
+    # This new refresh token will be supplied via a “refresh” key in the JSON response. New refresh tokens will have a renewed expiration time which is determined by adding the timedelta in the REFRESH_TOKEN_LIFETIME setting to the current time when the request is made.
+    #  If the blacklist app is in use and the BLACKLIST_AFTER_ROTATION setting is set to True, refresh tokens submitted to the refresh view will be added to the blacklist.
+    "ROTATE_REFRESH_TOKENS": False,
+    
+    # When set to True, causes refresh tokens submitted to the TokenRefreshView to be added to the blacklist if the blacklist app is in use and the ROTATE_REFRESH_TOKENS setting is set to True. 
+    # You need to add 'rest_framework_simplejwt.token_blacklist', to your INSTALLED_APPS in the settings file to use this setting.
+    "BLACKLIST_AFTER_ROTATION": False,
+    
+    # When set to True, last_login field in the auth_user table is updated upon login
+    # **warning**: Updating last_login will dramatically increase the number of database transactions.
+    "UPDATE_LAST_LOGIN": False,
+
+    # The algorithm from the PyJWT library which will be used to perform signing/verification operations on tokens. 
+    # To use symmetric HMAC signing and verification, the following algorithms may be used: 'HS256', 'HS384', 'HS512'. 
+    "ALGORITHM": "HS256",
+    
+    # The signing key that is used to sign the content of generated tokens. 
+    "SIGNING_KEY": env("SECRET_KEY"),
+    "VERIFYING_KEY": "",
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JSON_ENCODER": None,
+    "JWK_URL": None,
+    "LEEWAY": 0,
+
+    # he authorization header type(s) that will be accepted for views that require authentication. 
+    # For example, a value of 'Bearer' means that views requiring authentication would look for a header with the following format: Authorization: Bearer <token>.
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+    "ON_LOGIN_SUCCESS": "rest_framework_simplejwt.serializers.default_on_login_success",
+    "ON_LOGIN_FAILED": "rest_framework_simplejwt.serializers.default_on_login_failed",
+
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+
+    "JTI_CLAIM": "jti",
+
+    "CHECK_REVOKE_TOKEN": False,
+    "REVOKE_TOKEN_CLAIM": "hash_password",
+    "CHECK_USER_IS_ACTIVE": True,
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
