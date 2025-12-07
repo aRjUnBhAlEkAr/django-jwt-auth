@@ -18,21 +18,24 @@ class CustomUserManager(BaseUserManager):
         
         email = self.normalize_email(email=email)
         
+        extra_fields.setdefault('is_staff', True)
+        
         user = self.model(
             email=email,
             name=name,
+            **extra_fields,
         )
     
         user.set_password(password)
         user.save(using=self._db)
         
+        return user
     
     def create_superuser(self, email, name, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_admin', True)
         
-        superuser = self.create_user(email=email, name=name, password=password)
-        return 
+        superuser = self.create_user(email=email, name=name, password=password, **extra_fields)
+        return superuser
     
     
 class User(AbstractBaseUser):
@@ -42,7 +45,7 @@ class User(AbstractBaseUser):
     
     # user related role based field
     is_staff = models.BooleanField(default=False)   # staff-level access.
-    is_admin = models.BooleanField(default=False)   # full permissions.
+    is_admin = models.BooleanField(default=False)   # admin-level permissions.
     
     # user related status field
     is_active = models.BooleanField(default=True)   # active/inactive user.
@@ -64,7 +67,7 @@ class User(AbstractBaseUser):
     
     # return respective users email. you can set value in it as per requirements
     def __str__(self):
-        return self.email
+        return f"{self.email} - {self.is_admin}"
     
     def has_perm(self, perm):
         # Purpose: Checks if the user has a specific permission.
@@ -75,7 +78,7 @@ class User(AbstractBaseUser):
         # Ignores the perm parameter (so all admin users are treated as having all permissions).
         return self.is_admin
     
-    def has_module_perm(self, app):
+    def has_module_perms(self, app):
         # Purpose: Checks if the user has any permissions in a given app/module.
         # Parameter: app_label → Name of the Django app, e.g., "auth" or "students"
         # Usage: Django uses this when displaying admin app lists or determining access at the app/module level.
