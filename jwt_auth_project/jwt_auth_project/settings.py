@@ -66,7 +66,11 @@ REST_FRAMEWORK = {
         # or allow read-only access for unauthenticated users.
         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    # below line of code tells Django REST Framework to use your CustomRenderer as the default renderer for all API responses across the project.
+    'DEFAULT_RENDERER_CLASSES': (
+        'auth_app.renderers.CustomRenderer', 
+    ),
 }
 
 # below line tells Django to use a custom user model instead of the default one
