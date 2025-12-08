@@ -1,5 +1,6 @@
 # third-party package imports
 from rest_framework import serializers
+from django.contrib.auth import authenticate
 
 # local imports
 from auth_app.models import User
@@ -84,3 +85,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         
         # Return the new saved user instance
         return user
+
+# user login serializer
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    
+    # user validation function
+    def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
+        
+        # authenticating user using 'authenticate()' method of django.contrib.auth
+        user = authenticate(username=username, password=password)
+        
+        if not user:
+            raise serializers.ValidationError("Invalid Username or Password!")
+        
+        attrs['user'] = user
+        
+        return attrs
